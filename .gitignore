@@ -5,6 +5,8 @@ workshops/
 **/node_modules/**
 apuntes.docx
 projects/FSND/
+starter/
+starter\
 
 
 # Byte-compiled / optimized / DLL files
