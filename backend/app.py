@@ -5,13 +5,13 @@ from flask import Flask, request, jsonify, abort
 from flask_cors import CORS
 
 from auth import AuthError, requires_auth
-from models import Actor, Movie, Appearance, setup_db, reset_db_records
+from models import Actor, Movie, Appearance, setup_db
 
 
-def create_app():
+def create_app(config='config'):
     # App Config
     app = Flask(__name__)
-    app.config.from_object('config')
+    app.config.from_object(config)
 
     # Setup db
     setup_db(app)
@@ -29,14 +29,7 @@ def create_app():
     def hello():
         return 'Hello, World!'
 
-    @app.route('/reset_db', methods=['POST'])
-    def reset_db():
-        reset_db_records()
-        return jsonify({
-            "success": True,
-            "message": "Database entries were reset.",
-        }), 200
-
+    # ACTORS ENDPOINTS
     @app.route('/actors', methods=['GET'])
     @requires_auth('get:actors-detail')
     def get_actors(payload):
@@ -45,19 +38,6 @@ def create_app():
             return jsonify({
                 "success": True,
                 "actors": actors
-            }), 200
-        except BaseException:
-            print(sys.exc_info())
-            abort(404)
-
-    @app.route('/movies', methods=['GET'])
-    @requires_auth('get:movies-detail')
-    def get_movies(payload):
-        try:
-            movies = [movie.describe() for movie in Movie.query.all()]
-            return jsonify({
-                "success": True,
-                "movies": movies
             }), 200
         except BaseException:
             print(sys.exc_info())
@@ -80,73 +60,6 @@ def create_app():
             return jsonify({
                 'success': True,
                 'new_actor': new_actor.describe()
-            }), 200
-
-        except BaseException:
-            print(sys.exc_info())
-            abort(404)
-
-    @app.route('/movies', methods=['POST'])
-    @requires_auth('post:movies')
-    def post_movie(payload):
-        body = request.get_json()
-        try:
-            if any((element not in body for element in ('title', 'release_date'))):
-                abort(422)
-
-            new_movie = Movie(
-                title=body['title'],
-                release_date=datetime.strptime(body['release_date'], '%Y-%m-%d'))
-            new_movie.insert()
-
-            return jsonify({
-                'success': True,
-                'new_movie': new_movie.describe()
-            }), 200
-
-        except BaseException:
-            print(sys.exc_info())
-            abort(404)
-
-    @app.route('/appearance', methods=['POST'])
-    @requires_auth('post:appearance')
-    def post_appearance(payload):
-        body = request.get_json()
-        try:
-            if any((element not in body for element in ('actor_id', 'movie_id'))):
-                abort(422)
-
-            new_appearance = Appearance(
-                actor_id=body['actor_id'],
-                movie_id=body['movie_id'],
-            )
-            new_appearance.insert()
-            return jsonify({
-                'success': True,
-                'new_appearance': new_appearance.describe()
-            }), 200
-
-        except BaseException:
-            print(sys.exc_info())
-            abort(404)
-
-    @app.route('/movies/<id>', methods=['PATCH'])
-    @requires_auth('patch:movies')
-    def patch_movie_id(payload, id):
-        body = request.get_json()
-        try:
-            patched_movie = Movie.query.get(id)
-
-            for element in body:
-                if element not in ('title', 'release_date'):
-                    abort(422)
-                setattr(patched_movie, element, body[element])
-
-            patched_movie.update()
-
-            return jsonify({
-                "success": True,
-                "patched_movie": patched_movie.describe()
             }), 200
 
         except BaseException:
@@ -178,7 +91,7 @@ def create_app():
 
     @app.route('/actors/<id>', methods=['DELETE'])
     @requires_auth('delete:actors')
-    def delete_actor(payload, id):
+    def delete_actor_id(payload, id):
         try:
             Actor.query.get(id).delete()
             return jsonify({
@@ -189,9 +102,68 @@ def create_app():
             print(sys.exc_info())
             abort(404)
 
+    # MOVIES ENDPOINTS
+    @app.route('/movies', methods=['GET'])
+    @requires_auth('get:movies-detail')
+    def get_movies(payload):
+        try:
+            movies = [movie.describe() for movie in Movie.query.all()]
+            return jsonify({
+                "success": True,
+                "movies": movies
+            }), 200
+        except BaseException:
+            print(sys.exc_info())
+            abort(404)
+
+    @app.route('/movies', methods=['POST'])
+    @requires_auth('post:movies')
+    def post_movie(payload):
+        body = request.get_json()
+        try:
+            if any((element not in body for element in ('title', 'release_date'))):
+                abort(422)
+
+            new_movie = Movie(
+                title=body['title'],
+                release_date=datetime.strptime(body['release_date'], '%Y-%m-%d'))
+            new_movie.insert()
+
+            return jsonify({
+                'success': True,
+                'new_movie': new_movie.describe()
+            }), 200
+
+        except BaseException:
+            print(sys.exc_info())
+            abort(404)
+
+    @app.route('/movies/<id>', methods=['PATCH'])
+    @requires_auth('patch:movies')
+    def patch_movie_id(payload, id):
+        body = request.get_json()
+        try:
+            patched_movie = Movie.query.get(id)
+
+            for element in body:
+                if element not in ('title', 'release_date'):
+                    abort(422)
+                setattr(patched_movie, element, body[element])
+
+            patched_movie.update()
+
+            return jsonify({
+                "success": True,
+                "patched_movie": patched_movie.describe()
+            }), 200
+
+        except BaseException:
+            print(sys.exc_info())
+            abort(404)
+
     @app.route('/movies/<id>', methods=['DELETE'])
     @requires_auth('delete:movies')
-    def delete_movie(payload, id):
+    def delete_movie_id(payload, id):
         try:
             Movie.query.get(id).delete()
             return jsonify({
@@ -202,8 +174,31 @@ def create_app():
             print(sys.exc_info())
             abort(404)
 
-    @app.route('/appearance', methods=['DELETE'])
-    @requires_auth('delete:appearance')
+    # APPEARANCES ENDPOINTS
+    @app.route('/appearances', methods=['POST'])
+    @requires_auth('post:appearances')
+    def post_appearance(payload):
+        body = request.get_json()
+        try:
+            if any((element not in body for element in ('actor_id', 'movie_id'))):
+                abort(422)
+
+            new_appearance = Appearance(
+                actor_id=body['actor_id'],
+                movie_id=body['movie_id'],
+            )
+            new_appearance.insert()
+            return jsonify({
+                'success': True,
+                'new_appearance': new_appearance.describe()
+            }), 200
+
+        except BaseException:
+            print(sys.exc_info())
+            abort(404)
+
+    @app.route('/appearances', methods=['DELETE'])
+    @requires_auth('delete:appearances')
     def delete_appearance(payload):
         body = request.get_json()
         try:
@@ -217,15 +212,9 @@ def create_app():
 
             return jsonify({
                 "success": True,
-                "delete": {'Actor ID': body['actor_id'], 'Movie ID': body['movie_id']}
+                "delete": {'actor_id': body['actor_id'], 'movie_id': body['movie_id']}
             }), 200
 
-            Actor.query.get(id).delete()
-
-            return jsonify({
-                "success": True,
-                "delete": id
-            }), 200
         except BaseException:
             abort(404)
 

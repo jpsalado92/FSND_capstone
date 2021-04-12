@@ -1,3 +1,4 @@
+import configparser
 import json
 from functools import wraps
 from urllib.request import urlopen
@@ -5,9 +6,13 @@ from urllib.request import urlopen
 from flask import request
 from jose import jwt
 
-AUTH0_DOMAIN = 'toblerone.eu.auth0.com'
+config = configparser.ConfigParser()
+config_file = "secrets.cfg"
+config.read(config_file)
+
+AUTH0_DOMAIN = config['AUTH0']['AUTH0_DOMAIN']
+API_AUDIENCE = config['AUTH0']['API_AUDIENCE']
 ALGORITHMS = ['RS256']
-API_AUDIENCE = 'FSND_Capstone'
 
 
 class AuthError(Exception):
@@ -27,7 +32,10 @@ def get_token_auth_header():
     Raises an AuthError if no header is present or if it is malformed.
     """
     if 'Authorization' not in request.headers:
-        raise AuthError({'code': 'unauthorized', 'description': 'Malformed header.'}, 401)
+        raise AuthError(
+            {'code': 'unauthorized', 'description': 'Authorization header was not found.'},
+            401
+        )
 
     auth_header = request.headers["Authorization"]
     header_parts = auth_header.split(' ')
@@ -59,7 +67,6 @@ def check_permissions(permission, payload):
             , 400
         )
     if permission not in payload['permissions']:
-        print(payload)
         raise AuthError(
             {'code': 'unauthorized', 'description': 'Permission not found.'},
             401)
