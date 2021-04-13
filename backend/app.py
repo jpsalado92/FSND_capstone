@@ -269,3 +269,9 @@ def create_app(config_file=os.path.join(os.getcwd(), 'config', 'dev_config.py'))
         }), 422
 
     return app
+
+
+app = create_app()
+
+if __name__ == '__main__':
+    app.run()
