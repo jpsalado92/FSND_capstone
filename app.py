@@ -17,6 +17,8 @@ def create_app(config_file=os.path.join(os.getcwd(), 'config', 'dev_config.py'))
     if not database_path:
         app.config.from_pyfile(config_file)
     else:
+        if 'postgres:' in database_path:
+            database_path = database_path.replace('postgres:', 'postgresql:')
         app.config["SQLALCHEMY_DATABASE_URI"] = database_path
 
     # Setup models
