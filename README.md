@@ -341,10 +341,6 @@ To run the server, execute:
 flask run
 ```
 
-
-
-
-
 ## FAQ
 ### What are database migrations?
 **Migrations** help us to manage modifications in our data schema over time, like a **version control** system.
