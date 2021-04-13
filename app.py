@@ -5,8 +5,8 @@ from datetime import datetime
 from flask import Flask, request, jsonify, abort
 from flask_cors import CORS
 
-from backend.auth.auth import AuthError, requires_auth
-from backend.db.models import Actor, Movie, Appearance, setup_db
+from auth.auth import AuthError, requires_auth
+from models.models import Actor, Movie, Appearance, setup_db
 
 
 def create_app(config_file=os.path.join(os.getcwd(), 'config', 'dev_config.py')):
@@ -19,7 +19,7 @@ def create_app(config_file=os.path.join(os.getcwd(), 'config', 'dev_config.py'))
     else:
         app.config["SQLALCHEMY_DATABASE_URI"] = database_path
 
-    # Setup db
+    # Setup models
     setup_db(app)
 
     # CORS Headers

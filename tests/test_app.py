@@ -5,8 +5,8 @@ import unittest
 
 from flask_sqlalchemy import SQLAlchemy
 
-from backend.app import create_app
-from backend.db.models import Actor, Appearance, Movie
+from app import create_app
+from models.models import Actor, Appearance, Movie
 
 secrets = configparser.ConfigParser()
 secrets.read(os.path.join(os.getcwd(), 'auth', 'secrets.cfg'))

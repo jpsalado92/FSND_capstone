@@ -43,13 +43,12 @@ These include:
 ## Project Structure
 ### Main Files
 ```sh
-README.md                   # The file you are currently reading.
-backend
+  ├── README.md                   # The file you are currently reading.
   ├── app.py                # The main driver of the app.
   ├── Procfile              # File needed for Heroku deployment.
   ├── requirements.txt      # The dependencies we needed for running the project.
-  ├── manage.py             # File to support db migrations on Heroku.
-  ├── migrations            # Directory containing db migration files.
+  ├── manage.py             # File to support models migrations on Heroku.
+  ├── migrations            # Directory containing models migration files.
   ├── tests
   │   ├── __init__.py  
   │   ├── FSND_Capstone~    # Collection of requests importable by Postman.
@@ -62,7 +61,7 @@ backend
   │   ├── __init__.py
   │   ├── auth.py           # Module containing authentication logic.
   │   └── secrets.cfg       # File containing secrets (Shouldn't be shared)
-  └── db
+  └── models
       ├── __init__.py 
       └── models.py         # SQLAlchemy models.
   ```
@@ -294,8 +293,8 @@ Delete an existing appearance from the db.
 ```
 
 ## Testing
-To run the tests, make sure that proper JWT tokens have been placed in [secrets.cfg](backend/auth/secrets.cfg). Then, cd to
-the [backend/tests](backend/tests) folder and run the following command in the terminal: 
+To run the tests, make sure that proper JWT tokens have been placed in [secrets.cfg](auth/secrets.cfg). Then, cd to
+the [backend/tests](tests) folder and run the following command in the terminal: 
 ```
 python test_app.py
 ```
