@@ -1,15 +1,16 @@
 import configparser
 import json
+import os
 import unittest
 
 from flask_sqlalchemy import SQLAlchemy
 
-from app import create_app
-from models import Actor, Appearance, Movie
+from backend.app import create_app
+from backend.db.models import Actor, Appearance, Movie
 
-config = configparser.ConfigParser()
-config_file = "secrets.cfg"
-config.read(config_file)
+secrets = configparser.ConfigParser()
+secrets.read(os.path.join(os.getcwd(), 'auth', 'secrets.cfg'))
+config_file = os.path.join(os.getcwd(), 'config', 'test_config.py')
 
 
 class UnauthorizedTestCase(unittest.TestCase):
@@ -17,7 +18,7 @@ class UnauthorizedTestCase(unittest.TestCase):
 
     def setUp(self):
         """Define test variables and initialize app."""
-        self.app = create_app('test_config')
+        self.app = create_app(config_file)
         self.client = self.app.test_client
         self.new_actor = {'name': 'TestActor', 'gender': 'Male', 'birth_date': '2000-01-01'}
         self.patched_actor = {'name': 'TestPatchedActor'}
@@ -123,13 +124,13 @@ class ExecutiveProducerTestCase(unittest.TestCase):
 
     def setUp(self):
         """Define test variables and initialize app."""
-        self.app = create_app('test_config')
+        self.app = create_app(config_file)
         self.client = self.app.test_client
         self.new_actor = {'name': 'TestActor', 'gender': 'Male', 'birth_date': '2000-01-01'}
         self.patched_actor = {'name': 'TestPatchedActor'}
         self.new_movie = {'title': 'TestMovie', 'release_date': '2000-01-01'}
         self.patched_movie = {'title': 'TestPatchedMovie'}
-        self.auth_token = ' '.join(('Bearer', config['JWT']['EXECUTIVE_PRODUCER_JWT']))
+        self.auth_token = ' '.join(('Bearer', secrets['JWT']['EXECUTIVE_PRODUCER_JWT']))
         # binds the app to the current context
         with self.app.app_context():
             self.db = SQLAlchemy()
@@ -302,13 +303,13 @@ class CastingDirectorTestCase(unittest.TestCase):
 
     def setUp(self):
         """Define test variables and initialize app."""
-        self.app = create_app('test_config')
+        self.app = create_app(config_file)
         self.client = self.app.test_client
         self.new_actor = {'name': 'TestActor', 'gender': 'Male', 'birth_date': '2000-01-01'}
         self.patched_actor = {'name': 'TestPatchedActor'}
         self.new_movie = {'title': 'TestMovie', 'release_date': '2000-01-01'}
         self.patched_movie = {'title': 'TestPatchedMovie'}
-        self.auth_token = ' '.join(('Bearer', config['JWT']['CASTING_DIRECTOR_JWT']))
+        self.auth_token = ' '.join(('Bearer', secrets['JWT']['CASTING_DIRECTOR_JWT']))
         # binds the app to the current context
         with self.app.app_context():
             self.db = SQLAlchemy()

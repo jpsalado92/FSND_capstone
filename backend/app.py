@@ -1,17 +1,18 @@
+import os
 import sys
 from datetime import datetime
 
 from flask import Flask, request, jsonify, abort
 from flask_cors import CORS
 
-from auth import AuthError, requires_auth
-from models import Actor, Movie, Appearance, setup_db
+from backend.auth.auth import AuthError, requires_auth
+from backend.db.models import Actor, Movie, Appearance, setup_db
 
 
-def create_app(config='config'):
+def create_app(config_file=os.path.join(os.getcwd(), 'config', 'dev_config.py')):
     # App Config
     app = Flask(__name__)
-    app.config.from_object(config)
+    app.config.from_pyfile(config_file)
 
     # Setup db
     setup_db(app)

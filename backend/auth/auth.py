@@ -5,11 +5,12 @@ from urllib.request import urlopen
 
 from flask import request
 from jose import jwt
+import os
 
 config = configparser.ConfigParser()
-config_file = "secrets.cfg"
-config.read(config_file)
+config_file = os.path.join(os.getcwd(), 'auth', 'secrets.cfg')
 
+config.read(config_file)
 AUTH0_DOMAIN = config['AUTH0']['AUTH0_DOMAIN']
 API_AUDIENCE = config['AUTH0']['API_AUDIENCE']
 ALGORITHMS = ['RS256']
