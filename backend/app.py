@@ -12,7 +12,12 @@ from backend.db.models import Actor, Movie, Appearance, setup_db
 def create_app(config_file=os.path.join(os.getcwd(), 'config', 'dev_config.py')):
     # App Config
     app = Flask(__name__)
-    app.config.from_pyfile(config_file)
+
+    database_path = os.environ.get('DATABASE_URL')
+    if not database_path:
+        app.config.from_pyfile(config_file)
+    else:
+        app.config["SQLALCHEMY_DATABASE_URI"] = database_path
 
     # Setup db
     setup_db(app)
